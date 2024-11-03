@@ -1,5 +1,5 @@
 # gRPC
-grpcio==1.44.0
+grpcio==1.53.2
 grpcio-tools==1.44.0
 
 # HTTP Client
