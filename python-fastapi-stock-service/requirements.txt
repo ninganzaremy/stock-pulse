@@ -1,0 +1,13 @@
+# gRPC
+grpcio==1.44.0
+grpcio-tools==1.44.0
+
+# HTTP Client
+requests==2.26.0
+
+# Redis for caching
+redis==4.1.0
+
+# FastAPI for optional REST API
+fastapi==0.75.0
+uvicorn==0.17.0
