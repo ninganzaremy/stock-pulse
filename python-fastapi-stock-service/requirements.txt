@@ -3,7 +3,7 @@ grpcio==1.53.2
 grpcio-tools==1.44.0
 
 # HTTP Client
-requests==2.26.0
+requests==2.32.2
 
 # Redis for caching
 redis==4.1.0
