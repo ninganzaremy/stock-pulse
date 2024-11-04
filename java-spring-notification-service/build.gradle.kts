@@ -3,6 +3,7 @@ plugins {
 	id("org.springframework.boot") version "3.3.5"
 	id("io.spring.dependency-management") version "1.1.6"
 	id("org.asciidoctor.jvm.convert") version "3.3.2"
+	id("com.google.protobuf") version "0.9.4"
 }
 
 group = "com.stockpulse"
@@ -25,8 +26,12 @@ repositories {
 }
 
 extra["snippetsDir"] = file("build/generated-snippets")
+extra["grpcVersion"] = "1.54.0"
+extra["grpcKotlinVersion"] = "1.3.0"
+extra["protobufVersion"] = "3.22.2"
 
 dependencies {
+
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.springframework.boot:spring-boot-starter-security")
@@ -42,7 +47,36 @@ dependencies {
 	testImplementation("org.springframework.restdocs:spring-restdocs-mockmvc")
 	testImplementation("org.springframework.security:spring-security-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+	// gRPC dependencies
+	implementation("io.grpc:grpc-netty-shaded:${project.extra["grpcVersion"]}")
+	implementation("io.grpc:grpc-protobuf:${project.extra["grpcVersion"]}")
+	implementation("io.grpc:grpc-stub:${project.extra["grpcVersion"]}")
+	implementation("net.devh:grpc-server-spring-boot-starter:2.14.0.RELEASE")
+
+	// Flyway dependencies
+	implementation("org.flywaydb:flyway-core")
+	implementation("org.flywaydb:flyway-database-postgresql:10.10.0")
 }
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:${project.extra["protobufVersion"]}"
+    }
+    plugins {
+        create("grpc") {
+            artifact = "io.grpc:protoc-gen-grpc-java:${project.extra["grpcVersion"]}"
+        }
+    }
+    generateProtoTasks {
+        all().forEach { task ->
+            task.plugins {
+                create("grpc")
+            }
+        }
+    }
+}
+
 
 tasks.withType<Test> {
 	useJUnitPlatform()
