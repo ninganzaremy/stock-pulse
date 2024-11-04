@@ -1,13 +1,6 @@
-# gRPC
-grpcio==1.54.0
-grpcio-tools==1.54.0
-
-# HTTP Client
-requests==2.31.0
-
-# Redis for caching
-redis==4.5.1
-
-# FastAPI for REST API
-fastapi==0.95.0
-uvicorn==0.21.1
+fastapi
+uvicorn[standard]
+psycopg2-binary
+SQLAlchemy
+grpcio
+grpcio-tools

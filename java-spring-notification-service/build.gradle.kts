@@ -31,6 +31,7 @@ extra["grpcKotlinVersion"] = "1.3.0"
 extra["protobufVersion"] = "3.22.2"
 
 dependencies {
+
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.springframework.boot:spring-boot-starter-security")
@@ -59,34 +60,23 @@ dependencies {
 }
 
 protobuf {
-	protoc {
-		artifact = "com.google.protobuf:protoc:${project.extra["protobufVersion"]}"
-	}
-	plugins {
-		create("grpc") {
-			artifact = "io.grpc:protoc-gen-grpc-java:${project.extra["grpcVersion"]}"
-		}
-	}
-	generateProtoTasks {
-		all().forEach {
-			it.plugins {
-				create("grpc")
-			}
-		}
-	}
+    protoc {
+        artifact = "com.google.protobuf:protoc:${project.extra["protobufVersion"]}"
+    }
+    plugins {
+        create("grpc") {
+            artifact = "io.grpc:protoc-gen-grpc-java:${project.extra["grpcVersion"]}"
+        }
+    }
+    generateProtoTasks {
+        all().forEach { task ->
+            task.plugins {
+                create("grpc")
+            }
+        }
+    }
 }
 
-sourceSets {
-	main {
-		proto {
-			srcDir("../proto")
-		}
-		java {
-			srcDirs("build/generated/source/proto/main/grpc")
-			srcDirs("build/generated/source/proto/main/java")
-		}
-	}
-}
 
 tasks.withType<Test> {
 	useJUnitPlatform()

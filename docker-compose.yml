@@ -1,4 +1,12 @@
 services:
+   zookeeper:
+      image: confluentinc/cp-zookeeper:7.4.0
+      ports:
+         - "2181:2181"
+      environment:
+         ZOOKEEPER_CLIENT_PORT: 2181
+         ZOOKEEPER_TICK_TIME: 2000
+
    kafka:
       image: confluentinc/cp-kafka:7.4.0
       depends_on:
@@ -8,18 +16,9 @@ services:
       environment:
          KAFKA_BROKER_ID: 1
          KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-         KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
-         KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-         KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+         KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+         KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
          KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-
-   zookeeper:
-      image: confluentinc/cp-zookeeper:7.4.0
-      ports:
-         - "2181:2181"
-      environment:
-         ZOOKEEPER_CLIENT_PORT: 2181
-         ZOOKEEPER_TICK_TIME: 2000
 
    redis:
       image: redis:7-alpine
@@ -29,20 +28,27 @@ services:
          - redis_data:/data
       command: redis-server --appendonly yes
 
+   frontend-react-websocket:
+      build: ./frontend-react-websocket
+      image: frontend-react-websocket-image
+      ports:
+         - "3000:80"
+      depends_on:
+         - java-spring-notification-service
+
    java-spring-notification-service:
       build:
          context: ./java-spring-notification-service
          dockerfile: Dockerfile
+      image: java-spring-notification-service-image
       environment:
          - SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5432/${DB_NAME}
          - SPRING_DATASOURCE_USERNAME=${DB_USER}
          - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
-         - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+         - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
          - REDIS_HOST=redis
       ports:
-         - "50052:50052"
-      extra_hosts:
-         - "host.docker.internal:host-gateway"
+         - "8080:8080"
       depends_on:
          - kafka
          - redis
@@ -51,16 +57,15 @@ services:
       build:
          context: ./python-fastapi-stock-service
          dockerfile: Dockerfile
+      image: python-fastapi-stock-service-image
       environment:
-         - DB_HOST=${DB_URL}
+         - DB_HOST=<db_container_name>
          - DB_USER=${DB_USER}
          - DB_PASSWORD=${DB_PASSWORD}
-         - DB_NAME=stock_pulse_db
-         - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+         - DB_NAME=${DB_NAME}
+         - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
       ports:
-         - "8000:8000"
-      extra_hosts:
-         - "host.docker.internal:host-gateway"
+         - "50051:50051"
       depends_on:
          - kafka
 
